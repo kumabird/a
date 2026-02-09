@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>iPad風OS</title>
+
+<style>
+    .delete-wallpaper-btn {
+        padding: 8px 14px;
+        background: #ff3b30;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        display: inline-block;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+</style>
+
+</head>
+<body>
+
+<button class="delete-wallpaper-btn" onclick="deleteWallpaper()">
+    壁紙を削除
+</button>
+</html>
+<script>
+/* ===== 全体 ===== */
+body {
+    margin: 0;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+}
+
+    .secret-app {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(20px);
+    color: white;
+    display: none;
+    flex-direction: column;
+    z-index: 2000;
+}
+
+.secret-titlebar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 24px;
+    font-size: 22px;
+    background: rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.secret-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+}
+
+.secret-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    text-align: center;
+}
+
+#secret-app-logo {
+    font-size: 80px;
+}
+
+.secret-open-btn {
+    padding: 12px 28px;
+    background: #007aff;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+}
+/* ===== ロック画面 ===== */
+#lockscreen {
+    position: absolute;
+    inset: 0;
+    background: none;
+　  background-size: cover;
+    background-position: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 120px;
+    color: white;
+    text-shadow: 0 0 12px rgba(0,0,0,0.6);
+    z-index: 1000;
+}
+
+#lock-date {
+    font-size: 35px;
+    font-weight: 600;
+    background: none;
+    margin-bottom: 10px;
+}
+
+#lock-time {
+    font-size: 88px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+/* ===== ホーム画面 ===== */
+#homescreen {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    display: none;
+    z-index: 900;
+}
+
+/* ===== アイコングリッド ===== */
+.app-grid {
+    position: absolute;
+    top: 80px;
+    left: 65px;
+
+    display: grid;
+    grid-template-columns: repeat(5, 100px); /* アイコン＋ラベルが収まる幅 */
+    grid-auto-rows: 120px;                   /* アイコン80px＋ラベルの高さ */
+    gap: 30px;                               /* iPadOS 風の余白 */
+}
+
+
+/* ===== アイコン ===== */
+.app-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 26px;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.35);
+    backdrop-filter: blur(10px);
+}
+
+.app-label {
+    margin-top: 4px;
+    text-align: center;
+    font-size: 12px;
+    color: white;
+    text-shadow: 0 0 6px rgba(0,0,0,0.8);
+}
+
+/* ===== アイコン色 ===== */
+.icon-youtube { background: #ff0000; }
+.icon-334 { background: #007aff; }
+.icon-2048 { background: #edc22e; font-size: 24px; font-weight: 700; }
+
+.icon-tver {
+    background: #ffffff;
+    font-size: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.tver-tv { color: #00b7ff; font-weight: 1000; }
+.tver-er { color: #555555; font-weight: 600; }
+
+.icon-settings {
+    background: #8e8e93;
+    font-size: 32px;
+}
+
+/* ===== アプリウィンドウ ===== */
+.app-window {
+    position: absolute;
+    inset: 0;
+    background: white;
+    display: none;
+    z-index: 950;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 0 30px rgba(0,0,0,0.4);
+}
+
+.app-titlebar {
+    height: 40px;
+    background: #f2f2f7;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    border-bottom: 1px solid #ccc;
+}
+
+.close-btn {
+    width: 18px;
+    height: 18px;
+    background: #ff5f57;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.app-title {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* ===== 設定アプリ ===== */
+.settings-container {
+    display: flex;
+    height: 100%;
+}
+
+.settings-menu {
+    width: 200px;
+    background: #f2f2f7;
+    border-right: 1px solid #ddd;
+    padding-top: 10px;
+}
+
+.settings-item {
+    padding: 12px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 6px;
+    margin: 4px 8px;
+}
+
+.settings-item:hover {
+    background: #e5e5ea;
+}
+
+.settings-content {
+    flex: 1;
+    background: #ffffff;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.settings-placeholder {
+    color: #888;
+    font-size: 14px;
+}
+
+/* ===== 壁紙サムネイル ===== */
+.wallpaper-section-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 10px 0;
+}
+
+.wallpaper-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 16px;
+}
+
+.wallpaper-thumb {
+    width: 100%;
+    height: 90px;
+    border-radius: 12px;
+    background-size: cover;
+    background-position: center;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: 0.2s;
+}
+
+.wallpaper-thumb.selected {
+    border: 3px solid #007aff;
+}
+</style>
+</head>
+
+<body>
+    <div id="ipad-frame">
+    <div id="ipad-bezel"></div>
+    <button id="home-button" onclick="goHome()"></button>
+</div>
+
+<!-- ========================= -->
+<!-- ロック画面 -->
+<!-- ========================= -->
+<div id="lockscreen">
+    <div id="lock-date"></div>
+    <div id="lock-time"></div>
+</div>
+
+<!-- ========================= -->
+<!-- ホーム画面 -->
+<!-- ========================= -->
+<div id="homescreen">
+    <div class="app-grid">
+
+        <div onclick="openApp('youtube')">
+            <div class="app-icon icon-youtube">▶</div>
+            <div class="app-label">YouTube</div>
+        </div>
+
+        <div onclick="openApp('app-334')">
+            <div class="app-icon icon-334">🌐</div>
+            <div class="app-label">33-4</div>
+        </div>
+
+        <div onclick="openApp('app-2048')">
+            <div class="app-icon icon-2048">2048</div>
+            <div class="app-label">2048</div>
+        </div>
+
+        <div onclick="openApp('app-tver')">
+            <div class="app-icon icon-tver">
+                <span class="tver-tv">tv</span><span class="tver-er">er</span>
+            </div>
+            <div class="app-label">TVer</div>
+        </div>
+
+        <div onclick="openApp('app-settings')">
+            <div class="app-icon icon-settings">⚙</div>
+            <div class="app-label">設定</div>
+        </div>
+
+    </div>
+</div>
+
+    <!-- 隠しアプリ UI（共通） -->
+<div id="secret-app-window" class="secret-app">
+    <div class="secret-titlebar">
+        <span id="secret-app-title">Secret App</span>
+        <button class="secret-close" onclick="closeSecretApp()">×</button>
+    </div>
+
+    <div class="secret-content">
+        <div id="secret-app-logo">🔒</div>
+        <div id="secret-app-desc"></div>
+
+        <button id="secret-app-open-btn" class="secret-open-btn">起動</button>
+    </div>
+</div>
+
+<!-- ========================= -->
+<!-- アプリウィンドウ -->
+<!-- ========================= -->
+<div id="app-334" class="app-window">
+    <div class="app-titlebar">
+        <div class="close-btn" onclick="closeApp('app-334')"></div>
+        <div class="app-title">33-4</div>
+    </div>
+
+    <div id="app-334-inner" style="padding:20px; font-family:monospace;">
+        <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>フィルタリング解除サンプル</title>
+</head>
+<body>
+<input type="text" id="urlInput" placeholder="URLを入力">
+<button onclick="openWebsite()">ウェブサイトを開く</button>
+<iframe id="websiteFrame" width="100%" height="600"></iframe>
+
+<script>
+function openWebsite() {
+    var url = document.getElementById("urlInput").value;
+    document.getElementById("websiteFrame").src = url;
+}
+</script>
+<script>
+window.onload = () => {
+    applySavedWallpapers();
+};
+
+function deleteWallpaper() {
+    localStorage.removeItem("wallpaper-home");
+    localStorage.removeItem("wallpaper-lock");
+
+    document.getElementById("homescreen").style.backgroundImage = "none";
+    document.getElementById("lockscreen").style.backgroundImage = "none";
+
+    alert("壁紙をリセットしました。");
+}
+<div id="app-2048" class="app-window">
+    <div class="app-titlebar">
+        <div class="close-btn" onclick="closeApp('app-2048')"></div>
+        <div class="app-title">2048</div>
+    </div>
+
+    <div id="app-2048-inner" style="padding:20px; font-family:monospace;">
+        <!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>2048</title>
+<style>
+  body {
+    background: #faf8ef;
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 40px;
+  }
+
+  #score {
+    font-size: 28px;
+    margin-bottom: 20px;
+    font-weight: bold;
+  }
+
+  #autoBtn {
+    font-size: 20px;
+    padding: 8px 20px;
+    margin-bottom: 20px;
+  }
+
+  #board {
+    position: relative;
+    width: 365px;
+    height: 365px;
+    background: #bbada0;
+    border-radius: 10px;
+    box-sizing: border-box;
+  }
+
+  .cell {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background: #cdc1b4;
+    border-radius: 5px;
+  }
+
+  .tile {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border-radius: 5px;
+    font-size: 30px;
+    font-weight: bold;
+    color: #776e65;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: left 0.15s ease, top 0.15s ease;
+  }
+
+  .new { animation: pop 0.2s ease-out; }
+  .merge { animation: merge 0.2s ease-out; }
+
+  @keyframes pop {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes merge {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+</style>
+</head>
+<body>
+
+<div id="score">Score: 0</div>
+<button id="autoBtn">Auto: OFF</button>
+<div id="board"></div>
+
+<script>
+/* ============================
+   基本設定
+============================ */
+const size = 4;
+let board = [];
+let score = 0;
+let lastSpawn = null;
+
+const boardDiv = document.getElementById("board");
+const OFFSET = 7;
+
+const colors = {
+  2:"#eee4da",4:"#ede0c8",8:"#f2b179",16:"#f59563",
+  32:"#f67c5f",64:"#f65e3b",128:"#edcf72",256:"#edcc61",
+  512:"#edc850",1024:"#edc53f",2048:"#edc22e",
+  4096:"#3c3a32",8192:"#1f1d1a",
+  16384:"#000000",32768:"#4c0000",65536:"#2b0000"
+};
+
+/* ============================
+   Auto
+============================ */
+let auto = false;
+let autoTimer = null;
+
+document.getElementById("autoBtn").onclick = () => {
+  auto = !auto;
+  document.getElementById("autoBtn").textContent = auto ? "Auto: ON" : "Auto: OFF";
+  if (auto) startAuto();
+  else stopAuto();
+};
+
+function startAuto() {
+  if (autoTimer) return;
+  autoTimer = setInterval(() => {
+    const dir = getBestMove();
+    if (dir) move(dir);
+  }, 20);
+}
+
+function stopAuto() {
+  clearInterval(autoTimer);
+  autoTimer = null;
+}
+
+/* ============================
+   評価関数
+============================ */
+function evalEmptyTiles(bd) {
+  let c = 0;
+  for (let i = 0; i < size; i++)
+    for (let j = 0; j < size; j++)
+      if (bd[i][j] === 0) c++;
+  return c * 700;
+}
+
+function evalSmoothness(bd) {
+  let s = 0;
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      if (bd[i][j] === 0) continue;
+      const v = Math.log2(bd[i][j]);
+      if (j + 1 < size && bd[i][j+1] !== 0)
+        s -= Math.abs(v - Math.log2(bd[i][j+1]));
+      if (i + 1 < size && bd[i+1][j] !== 0)
+        s -= Math.abs(v - Math.log2(bd[i+1][j]));
+    }
+  }
+  return s * 50;
+}
+
+function evalMonotonicity(bd) {
+  let s = 0;
+  for (let i = 0; i < size; i++)
+    for (let j = 0; j < size - 1; j++)
+      s += bd[i][j] >= bd[i][j+1] ? 6 : -4;
+
+  for (let j = 0; j < size; j++)
+    for (let i = 0; i < size - 1; i++)
+      s += bd[i][j] >= bd[i+1][j] ? 6 : -4;
+
+  return s;
+}
+
+function maxTilePosition(bd) {
+  let max = 0, pos = {i:0,j:0};
+  for (let i=0;i<size;i++)
+    for (let j=0;j<size;j++)
+      if (bd[i][j] > max) { max = bd[i][j]; pos = {i,j}; }
+  return pos;
+}
+
+function evalMaxTilePosition(bd) {
+  const p = maxTilePosition(bd);
+  return (size - p.i + size - p.j) * 200;
+}
+
+function evaluateBoard(bd) {
+  return evalEmptyTiles(bd)
+       + evalSmoothness(bd)
+       + evalMonotonicity(bd)
+       + evalMaxTilePosition(bd);
+}
+
+/* ============================
+   4手先読み AI
+============================ */
+function getBestMove() {
+  const dirs = ["up", "left", "right", "down"];
+
+  let bestDir = null;
+  let bestScore = -Infinity;
+
+  for (const dir of dirs) {
+    const b1 = clone(board);
+    if (!simulateMove(b1, dir)) continue;
+
+    const spawn1 = getSpawnList(b1);
+
+    let total = 0, count = 0;
+
+    for (const s1 of spawn1) {
+      const b2 = clone(b1);
+      b2[s1.i][s1.j] = s1.v;
+
+      for (const dir2 of dirs) {
+        const b3 = clone(b2);
+        if (!simulateMove(b3, dir2)) continue;
+
+        const spawn2 = getSpawnList(b3);
+
+        for (const s2 of spawn2) {
+          const b4 = clone(b3);
+          b4[s2.i][s2.j] = s2.v;
+
+          for (const dir3 of dirs) {
+            const b5 = clone(b4);
+            if (!simulateMove(b5, dir3)) continue;
+
+            const spawn3 = getSpawnList(b5);
+
+            for (const s3 of spawn3) {
+              const b6 = clone(b5);
+              b6[s3.i][s3.j] = s3.v;
+
+              for (const dir4 of dirs) {
+                const b7 = clone(b6);
+                if (!simulateMove(b7, dir4)) continue;
+
+                total += evaluateBoard(b7);
+                count++;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (count === 0) continue;
+
+    const avg = total / count;
+    if (avg > bestScore) {
+      bestScore = avg;
+      bestDir = dir;
+    }
+  }
+
+  return bestDir;
+}
+
+function getSpawnList(bd) {
+  const empty = getEmpty(bd);
+  const list = [];
+
+  const cells = empty.length > 4 ? shuffle(empty).slice(0, 4) : empty;
+
+  for (const pos of cells) {
+    list.push({ i: pos.i, j: pos.j, v: 2 });
+    list.push({ i: pos.i, j: pos.j, v: 4 });
+  }
+  return list;
+}
+
+/* ============================
+   盤面処理
+============================ */
+function clone(bd) {
+  return bd.map(r => r.slice());
+}
+
+function getEmpty(bd) {
+  const a=[];
+  for (let i=0;i<size;i++)
+    for (let j=0;j<size;j++)
+      if (bd[i][j]===0) a.push({i,j});
+  return a;
+}
+
+function shuffle(a) {
+  return a.map(v=>({v,r:Math.random()}))
+          .sort((a,b)=>a.r-b.r)
+          .map(x=>x.v);
+}
+
+function simulateMove(bd, dir) {
+  let moved = false;
+
+  function slide(arr) {
+    arr = arr.filter(v => v !== 0);
+    for (let i = 0; i < arr.length - 1; i++) {
+      if (arr[i] === arr[i + 1]) {
+        arr[i] *= 2;
+        arr[i + 1] = 0;
+      }
+    }
+    arr = arr.filter(v => v !== 0);
+    while (arr.length < size) arr.push(0);
+    return arr;
+  }
+
+  if (dir === "left") {
+    for (let i = 0; i < size; i++) {
+      const newRow = slide(bd[i]);
+      if (newRow.toString() !== bd[i].toString()) moved = true;
+      bd[i] = newRow;
+    }
+  }
+
+  if (dir === "right") {
+    for (let i = 0; i < size; i++) {
+      let row = bd[i].slice().reverse();
+      row = slide(row);
+      row.reverse();
+      if (row.toString() !== bd[i].toString()) moved = true;
+      bd[i] = row;
+    }
+  }
+
+  if (dir === "up") {
+    for (let j = 0; j < size; j++) {
+      let col = [];
+      for (let i = 0; i < size; i++) col.push(bd[i][j]);
+      col = slide(col);
+      for (let i = 0; i < size; i++) {
+        if (bd[i][j] !== col[i]) moved = true;
+        bd[i][j] = col[i];
+      }
+    }
+  }
+
+  if (dir === "down") {
+    for (let j = 0; j < size; j++) {
+      let col = [];
+      for (let i = 0; i < size; i++) col.push(bd[i][j]);
+      col = col.reverse();
+      col = slide(col);
+      col.reverse();
+      for (let i = 0; i < size; i++) {
+        if (bd[i][j] !== col[i]) moved = true;
+        bd[i][j] = col[i];
+      }
+    }
+  }
+
+  return moved;
+}
+
+/* ============================
+   描画
+============================ */
+function drawGrid() {
+  boardDiv.innerHTML = "";
+  for (let i=0;i<size;i++)
+    for (let j=0;j<size;j++) {
+      const c = document.createElement("div");
+      c.className="cell";
+      c.style.left = j*90 + OFFSET + "px";
+      c.style.top  = i*90 + OFFSET + "px";
+      boardDiv.appendChild(c);
+    }
+}
+
+function render(anim=[]) {
+  document.querySelectorAll(".tile").forEach(t=>t.remove());
+  for (let i=0;i<size;i++)
+    for (let j=0;j<size;j++)
+      if (board[i][j]!==0) {
+        const t = document.createElement("div");
+        t.className="tile";
+        t.textContent = board[i][j];
+        t.style.background = colors[board[i][j]] || "#3c3a32";
+        t.style.left = j*90 + OFFSET + "px";
+        t.style.top  = i*90 + OFFSET + "px";
+
+        if (lastSpawn && lastSpawn.i===i && lastSpawn.j===j)
+          t.classList.add("new");
+
+        const a = anim.find(x=>x.i===i && x.j===j);
+        if (a) t.classList.add(a.type);
+
+        boardDiv.appendChild(t);
+      }
+  lastSpawn = null;
+}
+
+function updateScore() {
+  document.getElementById("score").textContent = "Score: " + score;
+}
+
+/* ============================
+   ゲーム処理
+============================ */
+function spawn() {
+  const empty = getEmpty(board);
+  if (empty.length===0) return;
+  const p = empty[Math.floor(Math.random()*empty.length)];
+  board[p.i][p.j] = Math.random()<0.3?4:2;
+  lastSpawn = p;
+}
+
+function move(dir) {
+  let moved = false;
+  let anim = [];
+  const before = board.map(r=>r.slice());
+
+  function slide(arr) {
+    arr = arr.filter(v=>v!==0);
+    for (let i=0;i<arr.length-1;i++)
+      if (arr[i]===arr[i+1]) { arr[i]*=2; score+=arr[i]; arr[i+1]=0; }
+    arr = arr.filter(v=>v!==0);
+    while (arr.length<size) arr.push(0);
+    return arr;
+  }
+
+  if (dir==="left") {
+    for (let i=0;i<size;i++) {
+      const n = slide(board[i]);
+      if (n.toString()!==board[i].toString()) moved=true;
+      board[i]=n;
+    }
+  }
+  if (dir==="right") {
+    for (let i=0;i<size;i++) {
+      let r = board[i].slice().reverse();
+      r = slide(r);
+      r.reverse();
+      if (r.toString()!==board[i].toString()) moved=true;
+      board[i]=r;
+    }
+  }
+  if (dir==="up") {
+    for (let j=0;j<size;j++) {
+      let c=[];
+      for (let i=0;i<size;i++) c.push(board[i][j]);
+      c = slide(c);
+      for (let i=0;i<size;i++) {
+        if (board[i][j]!==c[i]) moved=true;
+        board[i][j]=c[i];
+      }
+    }
+  }
+  if (dir==="down") {
+    for (let j=0;j<size;j++) {
+      let c=[];
+      for (let i=0;i<size;i++) c.push(board[i][j]);
+      c = c.reverse();
+      c = slide(c);
+      c.reverse();
+      for (let i=0;i<size;i++) {
+        if (board[i][j]!==c[i]) moved=true;
+        board[i][j]=c[i];
+      }
+    }
+  }
+
+  if (!moved) return;
+
+  updateScore();
+
+  for (let i=0;i<size;i++)
+    for (let j=0;j<size;j++)
+      if (board[i][j]!==0 && before[i][j]!==board[i][j])
+        anim.push({i,j,type:"merge"});
+
+  render(anim);
+
+  setTimeout(()=>{
+    spawn();
+    render([{...lastSpawn,type:"new"}]);
+    if (isGameOver()) alert("Game Over!");
+  },150);
+}
+
+function isGameOver() {
+  for (let i=0;i<size;i++)
+    for (let j=0;j<size;j++) {
+      if (board[i][j]===0) return false;
+      if (j<size-1 && board[i][j]===board[i][j+1]) return false;
+      if (i<size-1 && board[i][j]===board[i+1][j]) return false;
+    }
+  return true;
+}
+
+/* ============================
+   初期化
+============================ */
+function init() {
+  board = Array.from({length:size},()=>Array(size).fill(0));
+  score = 0;
+  updateScore();
+  drawGrid();
+  spawn();
+  spawn();
+  render();
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key==="ArrowLeft") move("left");
+  if (e.key==="ArrowRight") move("right");
+  if (e.key==="ArrowUp") move("up");
+  if (e.key==="ArrowDown") move("down");
+});
+
+init();
+</script>
+
+</body>
+</html>
+    </div>
+</div>
+
+<div id="app-tver" class="app-window">
+    <div class="app-titlebar">
+        <div class="close-btn" onclick="closeApp('app-tver')"></div>
+        <div class="app-title">TVer</div>
+    </div>
+    <iframe src="https://tver.jp" style="width:100%; height:calc(100% - 40px); border:none;"></iframe>
+</div>
+
+<!-- ========================= -->
+<!-- 設定アプリ -->
+<!-- ========================= -->
+<div id="app-settings" class="app-window">
+    <div class="app-titlebar">
+        <div class="close-btn" onclick="closeApp('app-settings')"></div>
+        <div class="app-title">設定</div>
+    </div>
+
+    <div class="settings-container">
+        <div class="settings-menu">
+            <div class="settings-item" onclick="openSettingsPage('wallpaper')">壁紙</div>
+            <div class="settings-item" onclick="openSettingsPage('ura')">裏モード</div>
+            <div class="settings-item" onclick="openSettingsPage('system')">システム</div>
+            <div class="settings-item" onclick="openSettingsPage('info')">情報</div>
+        </div>
+
+        <div class="settings-content" id="settings-content">
+            <div class="settings-placeholder">設定項目を選択してください</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function setClockFormat(type) {
+    localStorage.setItem("clock-format", type);
+    updateClock(); // 即時反映
+}
+
+function loadClockFormat() {
+    return localStorage.getItem("clock-format") || "24";
+}
+function changeIconSize(size) {
+    localStorage.setItem("icon-size", size);
+    applyIconSize();
+}
+
+function applyIconSize() {
+    const size = localStorage.getItem("icon-size") || "medium";
+    const icons = document.querySelectorAll(".app-icon");
+
+    icons.forEach(icon => {
+        if (size === "small") {
+            icon.style.width = "60px";
+            icon.style.height = "60px";
+            icon.style.fontSize = "20px";
+        } else if (size === "large") {
+            icon.style.width = "100px";
+            icon.style.height = "100px";
+            icon.style.fontSize = "32px";
+        } else {
+            icon.style.width = "80px";
+            icon.style.height = "80px";
+            icon.style.fontSize = "26px";
+        }
+    });
+}
+function loadSystemSettings() {
+    // 時計
+    const format = loadClockFormat();
+    const radio = document.querySelector(`input[name="clock-format"][value="${format}"]`);
+    if (radio) radio.checked = true;
+
+    // Dock
+    const dockEnabled = localStorage.getItem("dock-enabled") === "1";
+    const dockToggle = document.getElementById("dock-toggle");
+    if (dockToggle) dockToggle.checked = dockEnabled;
+
+    // アイコンサイズ
+    applyIconSize();
+}
+
+    function openSecretApp(name) {
+    const win = document.getElementById("secret-app-window");
+    const title = document.getElementById("secret-app-title");
+    const desc = document.getElementById("secret-app-desc");
+    const btn = document.getElementById("secret-app-open-btn");
+
+    if (name === "utopia") {
+        title.textContent = "Utopia";
+        desc.textContent = "新しいタブで Utopia を起動します。";
+        btn.onclick = () => window.open("https://utopia.nana.mr-moo.co.uk/", "_blank");
+    }
+
+    if (name === "wakame") {
+        title.textContent = "Wakame";
+        desc.textContent = "新しいタブで Wakame を起動します。";
+        btn.onclick = () => window.open("https://wkt-hcic.onrender.com/", "_blank");
+    }
+
+    win.style.display = "flex";
+}
+
+function closeSecretApp() {
+    document.getElementById("secret-app-window").style.display = "none";
+}
+
+    function applySavedWallpapers() {
+    const homeKey = localStorage.getItem("wallpaper-home");
+    const lockKey = localStorage.getItem("wallpaper-lock");
+
+    const customList = JSON.parse(localStorage.getItem("custom-wallpapers") || "[]");
+
+    // --- ホーム画面 ---
+    const home = document.getElementById("homescreen");
+    if (home) {
+        if (!homeKey) {
+            home.style.backgroundImage = "none"; // ← 壁紙なし
+        } else if (homeKey.startsWith("custom-")) {
+            const index = parseInt(homeKey.replace("custom-", ""));
+            const url = customList[index];
+            home.style.backgroundImage = url ? `url('${url}')` : "none";
+        } else if (homeKey === "divnil") {
+            home.style.backgroundImage =
+                "url('https://divnil.com/wallpaper/ipad/img/app/c/r/crznzmd_30b46d7f08cf7d136441d6e467126325_raw.jpg')";
+        } else {
+            home.style.backgroundImage = "none";
+        }
+    }
+
+    // --- ロック画面 ---
+    const lock = document.getElementById("lockscreen");
+    if (lock) {
+        if (!lockKey) {
+            lock.style.backgroundImage = "none"; // ← 壁紙なし
+        } else if (lockKey.startsWith("custom-")) {
+            const index = parseInt(lockKey.replace("custom-", ""));
+            const url = customList[index];
+            lock.style.backgroundImage = url ? `url('${url}')` : "none";
+        } else if (lockKey === "win11") {
+            lock.style.backgroundImage =
+                "url('https://divnil.com/wallpaper/ipad/img/app/w/i/windows-11-4k-esthetics_bwpmz22umzqarawkpjrnzwltrwdlaw0_5bf46acd75aefa7fc84cf9d52c24ed42_raw.jpg')";
+        } else {
+            lock.style.backgroundImage = "none";
+        }
+    }
+}
+
+
+/* ============================
+   時計（ロック画面）
+============================ */
+function updateClock() {
+    const now = new Date();
+    const format = loadClockFormat(); // "12" or "24"
+
+    const date = now.toLocaleDateString("ja-JP", {
+        month: "long",
+        day: "numeric",
+        weekday: "long"
+    });
+
+    let time;
+
+    if (format === "12") {
+        // ★ AM/PM を付けずに 12時間表示
+        time = now.toLocaleTimeString("ja-JP", {
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+
+        // ★ 24時間→12時間に変換（AM/PMなし）
+        let h = now.getHours();
+        let m = now.getMinutes().toString().padStart(2, "0");
+
+        h = h % 12;
+        if (h === 0) h = 12;
+
+        time = `${h}:${m}`;
+    } else {
+        // 24時間表示
+        time = now.toLocaleTimeString("ja-JP", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false
+        });
+    }
+
+    document.getElementById("lock-date").textContent = date;
+    document.getElementById("lock-time").textContent = time;
+}
+
+/* ============================
+   ロック解除
+============================ */
+document.getElementById("lockscreen").addEventListener("click", () => {
+    document.getElementById("lockscreen").style.display = "none";
+    document.getElementById("homescreen").style.display = "block";
+});
+
+/* ============================
+   アプリ開閉
+============================ */
+    function openApp(id) {
+   if (id === "youtube") {
+    window.open("https://newpro-3xg0.onrender.com/", "_blank");
+    return;
+}
+        document.getElementById(id).style.display = "block";
+}
+
+function closeApp(id) {
+    document.getElementById(id).style.display = "none";
+}
+
+/* ============================
+   設定アプリ：ページ切り替え
+============================ */
+function openUtopia() {
+    window.open("https://utopia.nana.mr-moo.co.uk/", "_blank");
+}
+
+function openWakame() {
+    window.open("https://wkt-hcic.onrender.com/", "_blank");
+}
+
+    function openSettingsPage(page) {
+    const content = document.getElementById("settings-content");
+
+    if (page === "wallpaper") {
+        content.innerHTML = `
+            <h2>壁紙</h2>
+
+            <div class="wallpaper-section-title">URL から追加（最大5枚）</div>
+            <input id="wallpaper-url-input" type="text" placeholder="画像URLを入力"
+                style="width:70%; padding:6px; border-radius:6px; border:1px solid #ccc;">
+            <button onclick="addCustomWallpaper()"
+                style="padding:6px 12px; margin-left:6px; border-radius:6px; background:#007aff; color:white; border:none;">
+                追加
+            </button>
+            <div class="wallpaper-section-title">カスタム壁紙</div>
+            <div class="wallpaper-grid" id="custom-wallpaper-grid"></div>
+
+            <div class="wallpaper-section-title">ロック画面（既定）</div>
+            <div class="wallpaper-grid">
+                <div class="wallpaper-thumb"
+                    style="background-image:url('https://divnil.com/wallpaper/ipad/img/app/w/i/windows-11-4k-esthetics_bwpmz22umzqarawkpjrnzwltrwdlaw0_5bf46acd75aefa7fc84cf9d52c24ed42_raw.jpg')"
+                    onclick="setWallpaper('lockscreen', 'win11')">
+                </div>
+            </div>
+
+            <div class="wallpaper-section-title">ホーム画面（既定）</div>
+            <div class="wallpaper-grid">
+                <div class="wallpaper-thumb"
+                    style="background-image:url('https://divnil.com/wallpaper/ipad/img/app/c/r/crznzmd_30b46d7f08cf7d136441d6e467126325_raw.jpg')"
+                    onclick="setWallpaper('homescreen', 'divnil')">
+                </div>
+            </div>
+        `;
+
+        loadCustomWallpapers();
+        highlightSelectedWallpapers();
+        return;
+    }
+
+    if (page === "ura") {
+    content.innerHTML = `
+        <h2>裏モード</h2>
+        <p>パスコードを入力してください。</p>
+
+        <input id="ura-pass" type="password" maxlength="12"
+            style="padding:10px; font-size:18px; width:180px; text-align:center;">
+
+        <button onclick="checkUraPass()"
+            style="padding:8px 16px; margin-left:10px;">OK</button>
+
+        <div id="ura-result" style="margin-top:10px; color:#888;"></div>
+
+        <div id="ura-menu" style="display:none; margin-top:20px;">
+            <h3>隠しアプリ</h3>
+
+            <button onclick="openSecretApp('utopia')">utopia</button>
+<button onclick="openSecretApp('wakame')">wakame</button>
+        </div>
+    `;
+    return;
+}
+        
+
+    if (page === "system") {
+    content.innerHTML = `
+        <h2>システム設定</h2>
+
+        <h3>時計</h3>
+        <label>
+            <input type="radio" name="clock-format" value="24" onchange="setClockFormat(24)">
+            24時間表示
+        </label><br>
+        <label>
+            <input type="radio" name="clock-format" value="12" onchange="setClockFormat(12)">
+            12時間表示
+        </label>
+
+        <h3 style="margin-top:20px;">Dock</h3>
+        <label>
+            <input type="checkbox" id="dock-toggle" onchange="toggleDock()">
+            Dock を表示する
+        </label>
+
+        <h3 style="margin-top:20px;">アイコンサイズ</h3>
+        <select onchange="changeIconSize(this.value)">
+            <option value="small">小</option>
+            <option value="medium" selected>中</option>
+            <option value="large">大</option>
+        </select>
+    `;
+
+    // 現在の設定を反映
+    loadSystemSettings();
+    return;
+}
+
+    if (page === "info") {
+    content.innerHTML = `
+        <h2>情報</h2>
+
+        <p>OS 名：ipad風OS</p>
+        <p>バージョン：1.1.3</p>
+        <p>開発者：hinata</p>
+
+        <h3>システム情報</h3>
+        <p>ブラウザ：${navigator.userAgent}</p>
+        <p>画面サイズ：${window.innerWidth} x ${window.innerHeight}</p>
+    `;
+    return;
+}
+}
+/* ============================
+   壁紙設定（既定 + カスタム）
+============================ */
+function checkUraPass() {
+    const input = document.getElementById("ura-pass").value;
+    const result = document.getElementById("ura-result");
+    const menu = document.getElementById("ura-menu");
+
+    if (input === "jagdyufr5t62") {
+        result.textContent = "認証成功！隠しアプリを表示します。";
+        menu.style.display = "block";
+    } else {
+        result.textContent = "パスコードが違います。";
+        menu.style.display = "none";
+    }
+}
+
+    function setWallpaper(target, name) {
+
+    // カスタム壁紙
+    if (target === "custom") {
+        let list = JSON.parse(localStorage.getItem("custom-wallpapers") || "[]");
+        const url = list[name];
+        if (!url) return;
+
+        document.getElementById("homescreen").style.backgroundImage = `url('${url}')`;
+        document.getElementById("lockscreen").style.backgroundImage = `url('${url}')`;
+
+        localStorage.setItem("wallpaper-lock", "custom-" + name);
+        localStorage.setItem("wallpaper-home", "custom-" + name);
+
+        highlightSelectedWallpapers();
+        return;
+    }
+
+    // 既定ロック画面
+    if (target === "lockscreen") {
+        if (name === "win11") {
+            document.getElementById("lockscreen").style.backgroundImage =
+                "url('https://divnil.com/wallpaper/ipad/img/app/w/i/windows-11-4k-esthetics_bwpmz22umzqarawkpjrnzwltrwdlaw0_5bf46acd75aefa7fc84cf9d52c24ed42_raw.jpg')";
+        }
+        localStorage.setItem("wallpaper-lock", name);
+    }
+
+    // 既定ホーム画面
+    if (target === "homescreen") {
+        if (name === "divnil") {
+            document.getElementById("homescreen").style.backgroundImage =
+                "url('https://divnil.com/wallpaper/ipad/img/app/c/r/crznzmd_30b46d7f08cf7d136441d6e467126325_raw.jpg')";
+        }
+        localStorage.setItem("wallpaper-home", name);
+    }
+
+    highlightSelectedWallpapers();
+}
+
+/* ============================
+   選択中の壁紙に青枠をつける
+============================ */
+function highlightSelectedWallpapers() {
+    const lock = localStorage.getItem("wallpaper-lock");
+    const home = localStorage.getItem("wallpaper-home");
+
+    document.querySelectorAll(".wallpaper-thumb").forEach(el => {
+        el.classList.remove("selected");
+    });
+
+    // 既定ロック
+    if (lock === "win11") {
+        const el = document.querySelector(".wallpaper-section-title:nth-of-type(3) + .wallpaper-grid .wallpaper-thumb");
+        if (el) el.classList.add("selected");
+    }
+
+    // 既定ホーム
+    if (home === "divnil") {
+        const el = document.querySelector(".wallpaper-section-title:nth-of-type(4) + .wallpaper-grid .wallpaper-thumb");
+        if (el) el.classList.add("selected");
+    }
+
+    // カスタム
+    if (lock && lock.startsWith("custom-")) {
+        const index = Number(lock.replace("custom-", ""));
+        const grid = document.getElementById("custom-wallpaper-grid");
+        if (grid && grid.children[index]) {
+            grid.children[index].classList.add("selected");
+        }
+    }
+}
+/* ============================
+   カスタム壁紙を追加（最大5枚）
+============================ */
+function addCustomWallpaper() {
+    const input = document.getElementById("wallpaper-url-input");
+    if (!input) return;
+
+    const url = input.value.trim();
+    if (!url) return;
+
+    let list = JSON.parse(localStorage.getItem("custom-wallpapers") || "[]");
+
+    if (list.length >= 5) {
+        alert("追加できるのは最大5枚までです。");
+        return;
+    }
+
+    list.push(url);
+    localStorage.setItem("custom-wallpapers", JSON.stringify(list));
+
+    loadCustomWallpapers();
+    input.value = "";
+}
+
+/* ============================
+   カスタム壁紙一覧を読み込む
+============================ */
+function loadCustomWallpapers() {
+    const grid = document.getElementById("custom-wallpaper-grid");
+    if (!grid) return;
+
+    grid.innerHTML = "";
+
+    let list = JSON.parse(localStorage.getItem("custom-wallpapers") || "[]");
+
+    list.forEach((url, index) => {
+        const div = document.createElement("div");
+        div.className = "wallpaper-thumb";
+        div.style.backgroundImage = `url('${url}')`;
+        div.onclick = () => setWallpaper("custom", index);
+        grid.appendChild(div);
+    });
+
+    highlightSelectedWallpapers();
+}
+
+/* ============================
+   起動時に壁紙を反映
+============================ */
+window.addEventListener("load", applySavedWallpapers);
+updateClock(); 
+setInterval(updateClock, 1000); 
+</script>
+</body>
+</html>
