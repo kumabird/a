@@ -372,25 +372,19 @@ function openYouTubeTab() {
     if (lock) lock.style.display = "none";
     if (home) home.style.display = "none";
 
-    function closeSettingsApp() {
-    const ids = [
-        "settings-app",
-        "settings",
-        "settings-container",
-        "settingsApp",
-        "settingsMenu",
-        "settings-screen",
-        "settingsUI"
-    ];
+    function closeSettings() {
+    const settings = document.getElementById("settings");
+    settings.style.display = "none";
 
-    ids.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = "none";
-    });
+    // ホーム画面は必ず表示
+    document.getElementById("home").style.display = "block";
 }
     // 裏ホームを表示
     const secret = document.getElementById("secret-homescreen");
     if (secret) secret.style.display = "block";
+}
+            if (document.getElementById("secret").dataset.open === "true") {
+    document.getElementById("secret").style.display = "block";
 }
 
 </script>
