@@ -362,59 +362,36 @@ body {
     });
 }
 
-            const secretBg = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbVzuXFeDisou2bPV9W39tV3unZ4cj26qihA&s";
-
-function openWakame() {
-    const wakame = document.getElementById("wakame-app");
-
-    // まず非表示のまま背景を読み込む
-    preloadImage(secretBg, () => {
-        wakame.style.backgroundImage = `url('${secretBg}')`;
-
-        // 読み込み完了したら表示
-        hideAllScreens();
-        wakame.style.display = "block";
-
-        // フェードイン
-        requestAnimationFrame(() => {
-            wakame.style.opacity = 1;
-        });
-    });
-}
-
-function openUtopia() {
-    const utopia = document.getElementById("utopia-app");
-
-    preloadImage(secretBg, () => {
-        utopia.style.backgroundImage = `url('${secretBg}')`;
-
-        hideAllScreens();
-        utopia.style.display = "block";
-
-        requestAnimationFrame(() => {
-            utopia.style.opacity = 1;
-        });
-    });
-}
-
 function openYouTubeTab() {
     window.open("https://newpro-3xg0.onrender.com/", "_blank");
 }
             function unlockSecretMode() {
-    const secret = document.getElementById("secret-homescreen");
+    // 通常画面を隠す
+    const lock = document.getElementById("lockscreen");
+    const home = document.getElementById("homescreen");
+    if (lock) lock.style.display = "none";
+    if (home) home.style.display = "none";
 
-    // 1. 全画面を隠す（裏ページは opacity だけ 0 にする）
-    hideAllScreensExceptSecret();
+    function closeSettingsApp() {
+    const ids = [
+        "settings-app",
+        "settings",
+        "settings-container",
+        "settingsApp",
+        "settingsMenu",
+        "settings-screen",
+        "settingsUI"
+    ];
 
-    // 2. 裏ページは最初から display:block なので、opacity を 0 にしておく
-    secret.style.opacity = 0;
-
-    // 3. 2秒後にフェードイン
-    setTimeout(() => {
-        secret.style.opacity = 1;
-    }, 2000);
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = "none";
+    });
 }
-
+    // 裏ホームを表示
+    const secret = document.getElementById("secret-homescreen");
+    if (secret) secret.style.display = "block";
+}
 
 </script>
     <!-- 裏ホーム画面 -->
@@ -438,7 +415,7 @@ function openYouTubeTab() {
 </div>
 <div class="secret-app-grid">
     <div class="secret-app utopia" onclick="openUtopia()">Utopia</div>
-    <div class="secret-app wakame" onclick="openWakame()">Wakame</div>
+<div class="secret-app wakame" onclick="openWakame()">Wakame</div>
 </div>
 
 <!-- ========================= -->
@@ -714,12 +691,12 @@ function openSettingsPage(page) {
         result.textContent = "パスコードが違います。";
     }
 }
-    function openUtopia() {
-    window.open("https://utopia.nana.mr-moo.co.uk/", "_blank");
+    function openWakame() {
+    window.open("https://wkt-hcic.onrender.com/", "_blank");
 }
 
-function openWakame() {
-    window.open("https://wkt-hcic.onrender.com/", "_blank");
+function openUtopia() {
+    window.open("https://utopia.nana.mr-moo.co.uk/", "_blank");
 }
     function toggleDock() {
     const enabled = document.getElementById("dock-toggle").checked;
