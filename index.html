@@ -8,7 +8,7 @@
     #secret-homescreen {
     opacity: 0;
     transition: opacity 0.5s ease;
-    display: none;
+    display: block; /* ← ここが重要 */
 }
     
     #wakame-app,
@@ -311,6 +311,7 @@ body {
 <!-- ========================= -->
 <div id="homescreen">
     <div class="app-grid">
+
         <!-- YouTube アイコン（新しいタブで開く） -->
         <div class="app-item" onclick="openYouTubeTab()">
             <div class="app-icon icon-youtube">▶</div>
@@ -342,11 +343,12 @@ body {
     </div>
 </div>
         <script>
-            function hideAllScreensExceptSecret() {
+            function hideAllScreens() {
     const ids = [
         "lockscreen",
         "homescreen",
         "settings-app",
+        "secret-homescreen",
         "wakame-app",
         "utopia-app"
     ];
@@ -355,12 +357,12 @@ body {
         const el = document.getElementById(id);
         if (el) {
             el.style.display = "none";
+            el.style.opacity = 0;
         }
     });
-
-    // 裏ページは display:block のまま
-    document.getElementById("secret-homescreen").style.display = "block";
 }
+
+            const secretBg = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbVzuXFeDisou2bPV9W39tV3unZ4cj26qihA&s";
 
 function openWakame() {
     const wakame = document.getElementById("wakame-app");
@@ -399,34 +401,20 @@ function openYouTubeTab() {
     window.open("https://newpro-3xg0.onrender.com/", "_blank");
 }
             function unlockSecretMode() {
-    // 通常画面を隠す
-    const lock = document.getElementById("lockscreen");
-    const home = document.getElementById("homescreen");
-    if (lock) lock.style.display = "none";
-    if (home) home.style.display = "none";
-
-    // 設定アプリを自動で探して閉じる
-    const settingsCandidates = [
-        "settings-app",
-        "settings",
-        "settings-container",
-        "settingsApp",
-        "settingsMenu"
-    ];
-
-    settingsCandidates.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = "none";
-    });
-
-    // 裏ホームを表示
     const secret = document.getElementById("secret-homescreen");
-    if (secret) secret.style.display = "block";
-    hideAllScreens(); 
-    secret.style.display = "block";
-    secret.style.opacity = 1;
 
+    // 1. 全画面を隠す（裏ページは opacity だけ 0 にする）
+    hideAllScreensExceptSecret();
+
+    // 2. 裏ページは最初から display:block なので、opacity を 0 にしておく
+    secret.style.opacity = 0;
+
+    // 3. 2秒後にフェードイン
+    setTimeout(() => {
+        secret.style.opacity = 1;
+    }, 2000);
 }
+
 
 </script>
     <!-- 裏ホーム画面 -->
