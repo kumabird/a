@@ -395,27 +395,14 @@ function openYouTubeTab() {
 
 </script>
     <!-- 裏ホーム画面 -->
-    <div id="secret-homescreen" class="secret-home" style="display:none;">
+<div id="secret-homescreen" class="secret-home" style="display:none;">
     <div class="secret-title">裏ホーム</div>
-        </div>
-    <!-- Wakame アプリ画面 -->
-<div id="wakame-app" class="secret-app-screen" style="display:none;">
-    <div class="secret-app-title wakame-title">Wakame</div>
-    <div class="secret-app-content wakame-content">
-        Wakame のコンテンツ
-    </div>
-</div>
 
-<!-- Utopia アプリ画面 -->
-<div id="utopia-app" class="secret-app-screen" style="display:none;">
-    <div class="secret-app-title utopia-title">Utopia</div>
-    <div class="secret-app-content utopia-content">
-        Utopia のコンテンツ
+    <!-- 裏ホームのアプリ一覧（ここに置くのが正しい） -->
+    <div class="secret-app-grid">
+        <div class="secret-app utopia" onclick="openUtopia()">Utopia</div>
+        <div class="secret-app wakame" onclick="openWakame()">Wakame</div>
     </div>
-</div>
-<div class="secret-app-grid">
-    <div class="secret-app utopia" onclick="openUtopia()">Utopia</div>
-<div class="secret-app wakame" onclick="openWakame()">Wakame</div>
 </div>
 
 <!-- ========================= -->
