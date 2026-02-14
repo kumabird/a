@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <title>iPad風OS</title>
-
+<input id="username-input" placeholder="ユーザー名">
+<input id="password-input" type="password" placeholder="パスワード">
+<button onclick="login()">ログイン</button>
 <style>
     #weather-detail {
     display: flex;
@@ -2204,6 +2206,8 @@ async function openYahooProxyInside(url){
     // 全プロキシ失敗時
     frame.srcdoc = `<h2>読み込みに失敗しました</h2><p>プロキシでの取得に失敗しました。</p>`;
 }
+    window.addEventListener("load", loadUsers);
+
 </script>
 
 <!-- ===== 天気バー ===== -->
