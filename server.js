@@ -1,9 +1,17 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import pkg from "pg";
-import cors from "cors";
 
 const { Pool } = pkg;
 
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
 const app = express();
 
 app.use(cors());
