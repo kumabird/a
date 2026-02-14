@@ -6,7 +6,84 @@
 <input id="username-input" placeholder="ユーザー名">
 <input id="password-input" type="password" placeholder="パスワード">
 <button onclick="login()">ログイン</button>
-<style>
+    <script>
+
+function getUserID(){
+
+  let id = localStorage.getItem("userid");
+
+  if(!id){
+
+    id = crypto.randomUUID();
+    localStorage.setItem("userid", id);
+
+  }
+
+  return id;
+
+}
+
+async function saveSettings(){
+
+  const userid = getUserID();
+
+  const wallpaper = document.body.style.backgroundImage;
+
+  const settings = {
+    example: "value"
+  };
+
+  await fetch("http://localhost:3000/api/save",{
+
+    method:"POST",
+
+    headers:{
+      "Content-Type":"application/json"
+    },
+
+    body:JSON.stringify({
+      userid,
+      wallpaper,
+      settings
+    })
+
+  });
+
+}
+
+async function loadSettings(){
+
+  const userid = getUserID();
+
+  const res = await fetch(
+    "http://localhost:3000/api/load/" + userid
+  );
+
+  const data = await res.json();
+
+  if(!data) return;
+
+  if(data.wallpaper){
+
+    document.body.style.backgroundImage = data.wallpaper;
+
+  }
+
+}
+
+loadSettings();
+
+function setWallpaper(url){
+
+  document.body.style.backgroundImage = `url(${url})`;
+
+  saveSettings();
+
+}
+
+</script>
+
+    <style>
     #weather-detail {
     display: flex;
     flex-direction: column;
