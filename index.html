@@ -566,6 +566,18 @@ body {
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     return hashArray.map(b => b.toString(16).padStart(2,"0")).join("");
 }
+    let USERS = {};
+
+async function loadUsers(){
+    try{
+        const res = await fetch("users.json");
+        USERS = await res.json();
+        console.log("ユーザー読み込み完了");
+    }catch(e){
+        console.error("users.json 読み込み失敗", e);
+    }
+}
+    
 
             function openDayDream() {
     incrementSecretCount();
