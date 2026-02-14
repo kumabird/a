@@ -611,6 +611,38 @@ async function loadUsers(){
     });
 }
 
+    function setCookie(name, value, days=365){
+    const d = new Date();
+    d.setTime(d.getTime() + (days*24*60*60*1000));
+    const expires = "expires=" + d.toUTCString();
+    document.cookie = name + "=" + encodeURIComponent(value) + ";" + expires + ";path=/";
+}
+
+function getCookie(name){
+    const cname = name + "=";
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const ca = decodedCookie.split(';');
+    for(let c of ca){
+        c = c.trim();
+        if(c.indexOf(cname) === 0){
+            return c.substring(cname.length);
+        }
+    }
+    return null;
+}
+
+    function setWallpaper(url){
+
+    // 背景変更
+    document.body.style.backgroundImage = `url('${url}')`;
+    document.body.style.backgroundSize = "cover";
+    document.body.style.backgroundPosition = "center";
+
+    // Cookieに保存
+    setCookie("wallpaper", url, 365);
+
+}
+
 function openYouTubeTab() {
     window.open("https://sitepro-d3up.onrender.com/", "_blank");
 }
