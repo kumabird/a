@@ -5,6 +5,155 @@
 <title>iPad風OS</title>
 
 <style>
+    #weather-detail {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+#weather-detail-content {
+    flex: 1;
+    overflow: hidden;
+}
+
+.detail-layout {
+    display: flex;
+    height: 100%;
+    min-height: 0;   /* ← 超重要 */
+}
+
+.detail-weather {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;   /* ← 超重要 */
+    padding-right: 15px;
+}
+
+.detail-news {
+    flex: 1;
+    overflow-y: auto;
+    border-left: 1px solid #ddd;
+    padding-left: 15px;
+    min-height: 0;   /* ← 超重要 */
+}
+
+    .news-card {
+    margin-bottom: 14px;
+}
+    /* ===== 天気詳細UI ===== */
+.weather-header {
+    text-align: center;
+    padding: 20px;
+    background: linear-gradient(180deg,#4facfe,#00f2fe);
+    color: white;
+}
+
+.weather-temp {
+    font-size: 48px;
+    font-weight: bold;
+}
+
+.weather-desc {
+    font-size: 18px;
+    opacity: 0.9;
+}
+
+.weather-card {
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 15px;
+    margin: 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.forecast-row {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+}
+
+.forecast-item {
+    min-width: 90px;
+    text-align: center;
+    background: rgba(255,255,255,0.9);
+    border-radius: 12px;
+    padding: 10px;
+}
+
+.news-card {
+    background: white;
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+}
+
+.news-card a {
+    text-decoration: none;
+    color: #111;
+    font-weight: 600;
+}
+
+    /* ===== 天気バー ===== */
+#weather-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    backdrop-filter: blur(10px);
+    z-index: 9999;
+    cursor: pointer;
+    padding: 0 12px;
+    gap: 12px;
+}
+
+#weather-bar .news-title {
+    max-width: 60%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+}
+
+/* フルスクリーン中は非表示にする */
+:fullscreen #weather-bar,
+:-webkit-full-screen #weather-bar {
+    display: none;
+}
+
+/* ===== 既存スタイル（省略せずそのまま保持） ===== */
+    .secret-app.daydream {
+    background: black;
+    color: #d8b4ff;
+    box-shadow: 0 0 15px #c084fc;
+}
+.secret-app.daydream:hover {
+    box-shadow: 0 0 25px #e9d5ff;
+}
+
+    .stars {
+    position: absolute;
+    inset: 0;
+    background-image:
+        radial-gradient(1.5px 1.5px at 70% 20%, white, transparent),
+        radial-gradient(1px 1px at 80% 35%, white, transparent),
+        radial-gradient(1px 1px at 65% 50%, white, transparent);
+    opacity: 0.6;
+    animation: twinkle 4s infinite alternate;
+}
+
+@keyframes twinkle {
+    from { opacity: 0.4; }
+    to { opacity: 0.8; }
+}
     #secret-homescreen {
     opacity: 0;
     transition: opacity 0.5s ease;
@@ -40,7 +189,7 @@
 #utopia-app { z-index: 60; }
 
     .secret-app-screen {
-    background-image: url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbVzuXFeDisou2bPV9W39tV3unZ4cj26qihA&s");
+    background-image: url("blob:chrome-untrusted://media-app/200dae8e-f83c-4bed-9419-53e7a7c85df6");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -146,7 +295,7 @@ body {
     top: 80px;
     left: 60px;
     display: grid;
-    grid-template-columns: repeat(4, 80px);
+    grid-template-columns: repeat(6, 80px);
     grid-auto-rows: 100px;
     gap: 28px;
 }
@@ -294,6 +443,72 @@ body {
 .wallpaper-thumb.selected {
     border: 3px solid #007aff;
 }
+    /* 裏ホームのオーバーレイはクリック透過して背景だけ担当させる */
+.secret-home::before {
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 裏ホーム内のUIを確実に前面に出す */
+#secret-homescreen, 
+#secret-homescreen .secret-title,
+#secret-homescreen .secret-app-grid,
+#secret-homescreen .secret-app {
+  position: relative;
+  z-index: 2;
+}
+
+/* タイトルの色を月光っぽく調整（必要に応じて色を変えて） */
+#secret-homescreen .secret-title {
+  color: #e8e6ff;
+}
+    html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: black; /* 念のため白を消す保険 */
+}
+/* 裏ホーム：ローカル画像優先で一箇所にまとめる */
+#secret-homescreen.secret-home {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+
+    /* ローカル画像を使う（ip.html と同じフォルダに moon.jpg を置く） */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* 画像の上に薄紫オーバーレイ（任意、雰囲気用） */
+#secret-homescreen.secret-home::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(70, 10, 120, 0.22);
+    pointer-events: none;
+    mix-blend-mode: multiply;
+}
+
+/* 画像の上に薄い紫オーバーレイをのせて世界観を統一（任意） */
+.secret-home::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(70, 10, 120, 0.22);
+    pointer-events: none;
+    mix-blend-mode: multiply;
+}
+
+/* weather detail content small tweaks */
+#weather-detail .app-titlebar .app-title {
+    margin-left: 0;
+}
+#weather-detail-content h2 { margin: 8px 0 6px; }
+#weather-detail-content p { margin: 4px 0; }
+#weather-detail .app-window { background: white; }
 </style>
 </head>
 
@@ -342,7 +557,21 @@ body {
 
     </div>
 </div>
-        <script>
+
+<script>
+    async function sha256(text){
+    const encoder = new TextEncoder();
+    const data = encoder.encode(text);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2,"0")).join("");
+}
+
+            function openDayDream() {
+    incrementSecretCount();
+    window.open("https://ddx.v2.nana.wilkszyn.dk/", "_blank");
+}
+
             function hideAllScreens() {
     const ids = [
         "lockscreen",
@@ -350,7 +579,13 @@ body {
         "settings-app",
         "secret-homescreen",
         "wakame-app",
-        "utopia-app"
+        "utopia-app",
+        "weather-detail",
+        "app-2048",
+        "app-334",
+        "app-tver",
+        "app-settings",
+        "youtube"
     ];
 
     ids.forEach(id => {
@@ -363,41 +598,364 @@ body {
 }
 
 function openYouTubeTab() {
-    window.open("https://newpro-3xg0.onrender.com/", "_blank");
+    window.open("https://sitepro-d3up.onrender.com/", "_blank");
 }
             function unlockSecretMode() {
-    // 通常画面を隠す
-    const lock = document.getElementById("lockscreen");
-    const home = document.getElementById("homescreen");
-    if (lock) lock.style.display = "none";
-    if (home) home.style.display = "none";
 
-    function closeSettings() {
-    const settings = document.getElementById("settings");
-    settings.style.display = "none";
+    hideAllScreens();
 
-    // ホーム画面は必ず表示
-    document.getElementById("home").style.display = "block";
-}
-    // 裏ホームを表示
+    incrementSecretCount();
+
     const secret = document.getElementById("secret-homescreen");
-    if (secret) secret.style.display = "block";
-}
-            if (document.getElementById("secret").dataset.open === "true") {
-    document.getElementById("secret").style.display = "block";
+    secret.style.display = "block";
+
+    requestAnimationFrame(() => {
+        secret.style.opacity = "1";
+    });
 }
 
+
+    function closeSettingsApp() {
+    const ids = [
+        "settings-app",
+        "settings",
+        "settings-container",
+        "settingsApp",
+        "settingsMenu",
+        "settings-screen",
+        "settingsUI"
+    ];
+
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = "none";
+    });
+}
+function closeSettings() {
+    const settings = document.getElementById("app-settings");
+    if (settings) settings.style.display = "none";
+
+    // ホーム画面を表示
+    const home = document.getElementById("homescreen");
+    if (home) home.style.display = "block";
+}
 </script>
-    <!-- 裏ホーム画面 -->
-<div id="secret-homescreen" class="secret-home" style="display:none;">
+
+<script>
+/* ============================
+   天気 + ニュース (奈良)
+   - latestWeatherData
+   - latestNewsData
+============================ */
+
+let latestWeatherData = null;
+let latestNewsData = null;
+    const NEWS_SOURCES = {
+    nhk: {
+        name: "NHK",
+        url: "https://www3.nhk.or.jp/rss/news/cat0.xml"
+    },
+    yahoo: {
+        name: "Yahoo",
+        url: "https://news.yahoo.co.jp/rss/topics/top-picks.xml"
+    },
+    it: {
+        name: "ITmedia",
+        url: "https://rss.itmedia.co.jp/rss/2.0/news_bursts.xml"
+    }
+};
+
+
+/* 天気取得（奈良） */
+async function loadWeather() {
+    try {
+        const lat = 34.6851;
+        const lon = 135.8048;
+
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 5000);
+
+        const res = await fetch(
+            `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia/Tokyo`,
+            { signal: controller.signal }
+        );
+
+        clearTimeout(timeout);
+
+        if (!res.ok) throw new Error("weather fetch failed");
+
+        latestWeatherData = await res.json();
+
+    } catch (e) {
+        console.warn("天気取得失敗", e);
+        latestWeatherData = null;
+    }
+
+    updateInfoBar();
+}
+
+/* ニュース取得（NHK RSS via rss2json） */
+async function loadNewsHeadline() {
+    try {
+        const selected = localStorage.getItem("news-source") || "nhk";
+
+        let rssUrl;
+
+        if (selected === "yahoo") {
+            rssUrl = "https://news.yahoo.co.jp/rss/topics/top-picks.xml";
+        } else {
+            rssUrl = "https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja";
+        }
+
+        const proxy = "https://api.allorigins.win/raw?url=";
+        const response = await fetch(proxy + encodeURIComponent(rssUrl));
+
+        if (!response.ok) throw new Error("Fetch failed");
+
+        const text = await response.text();
+
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(text, "text/xml");
+        const items = xml.querySelectorAll("item");
+
+        latestNewsData = {
+            items: Array.from(items).slice(0, 5).map(item => ({
+                title: item.querySelector("title")?.textContent || "",
+                link: item.querySelector("link")?.textContent || "#"
+            }))
+        };
+
+    } catch (error) {
+        console.error("ニュース取得エラー:", error);
+
+        latestNewsData = {
+            items: [
+                { title: "ニュースを取得できません", link: "#" }
+            ]
+        };
+    }
+
+    updateInfoBar();
+}
+/* 天気アイコン変換 */
+function getWeatherIcon(code) {
+    if (code === 0) return "☀";
+    if (code <= 3) return "⛅";
+    if (code <= 48) return "☁";
+    if (code <= 67) return "🌧";
+    if (code <= 77) return "🌨";
+    if (code <= 99) return "⛈";
+    return "🌍";
+}
+    function updateInfoBar() {
+    const bar = document.getElementById("weather-bar");
+    if (!bar) return;
+
+    let weatherText = "奈良 天気取得中...";
+    let newsText = "ニュース取得中...";
+
+    // 天気
+    if (latestWeatherData && latestWeatherData.current_weather) {
+        const current = latestWeatherData.current_weather;
+        weatherText = `奈良 ${getWeatherIcon(current.weathercode)} ${current.temperature}°C`;
+    }
+
+    // ニュース
+    if (latestNewsData && latestNewsData.items && latestNewsData.items.length > 0) {
+        newsText = latestNewsData.items[0].title;
+    }
+
+    bar.innerHTML = `
+        <span>${weatherText}</span>
+        <span style="opacity:0.6;">｜</span>
+        <span class="news-title">${newsText}</span>
+    `;
+}
+
+function showDetail(type) {
+    // ここでは weather-detail の中身を使う仕様に合わせる
+    const detail = document.getElementById("weather-detail");
+    const content = document.getElementById("weather-detail-content");
+
+    if (!content) return;
+
+    if (type === "weather") {
+
+        if (!latestWeatherData || !latestWeatherData.current_weather) {
+            content.innerHTML = "<h2>天気情報</h2><p>データがありません</p>";
+            detail.style.display = "block";
+            return;
+        }
+
+        const current = latestWeatherData.current_weather;
+
+        content.innerHTML = `
+            <h2>奈良の天気</h2>
+            <p>気温: ${current.temperature}°C</p>
+            <p>風速: ${current.windspeed} km/h</p>
+            <p>天気: ${getWeatherIcon(current.weathercode)}</p>
+        `;
+        detail.style.display = "block";
+        return;
+
+    } else if (type === "news") {
+
+        if (!latestNewsData || !latestNewsData.items?.length) {
+            content.innerHTML = "<h2>ニュース</h2><p>ニュースがありません</p>";
+            detail.style.display = "block";
+            return;
+        }
+
+        content.innerHTML = `
+            <h2>最新ニュース</h2>
+            <ul style="padding-left:20px;">
+                ${latestNewsData.items.map(item => {
+                    const safeUrl = (item.link || "#").replace(/'/g, "\\'");
+                    const safeTitle = (item.title || "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    return `
+                        <li style="margin-bottom:10px;">
+                            <a href="#"
+                               onclick="openNewsInside('${safeUrl}'); return false;"
+                               style="color:#4da3ff;">
+                                ${safeTitle}
+                            </a>
+                        </li>
+                    `;
+                }).join("")}
+            </ul>
+        `;
+        detail.style.display = "block";
+        return;
+
+    } else {
+        content.innerHTML = "<h2>情報</h2><p>未対応タイプ</p>";
+        detail.style.display = "block";
+        return;
+    }
+}
+
+/* 詳細表示（天気＋ニュースリスト） */
+function openWeatherDetail() {
+    const detail = document.getElementById("weather-detail");
+    const content = document.getElementById("weather-detail-content");
+
+    let html = `<div class="detail-layout">`;
+
+    // =====================
+    // 左：天気
+    // =====================
+    html += `<div class="detail-weather">`;
+
+    if (latestWeatherData && latestWeatherData.current_weather) {
+
+        const current = latestWeatherData.current_weather;
+        const daily = latestWeatherData.daily || { time: [], temperature_2m_max: [], temperature_2m_min: [], precipitation_probability_max: [] };
+
+        html += `
+            <div class="weather-header">
+                <div style="font-size:22px;">奈良</div>
+                <div class="weather-temp">${current.temperature}°C</div>
+                <div class="weather-desc">${getWeatherIcon(current.weathercode)}</div>
+            </div>
+        `;
+
+        html += `
+            <div class="weather-card">
+                <h3>現在の詳細</h3>
+                <p>風速: ${current.windspeed} km/h</p>
+                <p>最高気温: ${daily.temperature_2m_max?.[0] ?? "—"}°C</p>
+                <p>最低気温: ${daily.temperature_2m_min?.[0] ?? "—"}°C</p>
+                <p>降水確率: ${daily.precipitation_probability_max?.[0] ?? "—"}%</p>
+            </div>
+        `;
+
+        html += `<div class="weather-card">
+                    <h3>5日間予報</h3>
+                    <div class="forecast-row">`;
+
+        for (let i = 0; i < 5; i++) {
+            const day = daily.time?.[i] ? daily.time[i].slice(5) : "";
+            const tmax = daily.temperature_2m_max?.[i] ?? "—";
+            const tmin = daily.temperature_2m_min?.[i] ?? "—";
+            html += `
+                <div class="forecast-item">
+                    <div>${day}</div>
+                    <div style="font-size:18px;">
+                        ${tmax}°
+                    </div>
+                    <div style="font-size:12px; opacity:0.6;">
+                        ${tmin}°
+                    </div>
+                </div>
+            `;
+        }
+
+        html += `</div></div>`;
+    } else {
+        html += `<div style="padding:16px;"><p>天気データがありません</p></div>`;
+    }
+
+    html += `</div>`; // 天気終了
+
+    // =====================
+    // 右：ニュース
+    // =====================
+    html += `<div class="detail-news">
+                <h3 style="margin-top:0;">最新ニュース</h3>`;
+
+    if (latestNewsData && latestNewsData.items && latestNewsData.items.length) {
+        latestNewsData.items.slice(0, 10).forEach(item => {
+            const safeUrl = (item.link || "#").replace(/'/g, "\\'");
+            const safeTitle = (item.title || "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            html += `
+                <div class="news-card">
+                    <a href="#"
+                       onclick="openNewsInside('${safeUrl}'); return false;">
+                        ${safeTitle}
+                    </a>
+                </div>
+            `;
+        });
+    } else {
+        html += `<p style="padding:12px;">ニュースデータなし</p>`;
+    }
+
+    html += `</div>`; // ニュース終了
+
+    html += `</div>`; // レイアウト終了
+
+    // --- 必ずここで差し込む ---
+    content.innerHTML = html;
+    detail.style.display = "block";
+}
+
+/* 自動更新 */
+function startInfoAutoUpdate() {
+    loadWeather();
+    loadNewsHeadline();
+
+    // 10分ごと天気更新、5分ごとニュース更新
+    setInterval(loadWeather, 10 * 60 * 1000);
+    setInterval(loadNewsHeadline, 5 * 60 * 1000);
+}
+
+/* 初回起動は window load で */
+window.addEventListener("load", () => {
+    startInfoAutoUpdate();
+});
+</script>
+
+    <div id="secret-homescreen" class="secret-home" style="display:none;">
     <div class="secret-title">裏ホーム</div>
 
-    <!-- 裏ホームのアプリ一覧（ここに置くのが正しい） -->
     <div class="secret-app-grid">
         <div class="secret-app utopia" onclick="openUtopia()">Utopia</div>
         <div class="secret-app wakame" onclick="openWakame()">Wakame</div>
+        <div class="secret-app daydream" onclick="openDayDream()">Day Dream</div>
     </div>
 </div>
+
+
 
 <!-- ========================= -->
 <!-- アプリウィンドウ -->
@@ -412,8 +970,9 @@ function openYouTubeTab() {
 
 <script>
 function openYouTube() {
-    window.open("https://newpro-3xg0.onrender.com/", "_blank");
+    window.open("https://sitepro-d3up.onrender.com/", "_blank");
 }
+
     function preloadImage(url, callback) {
     const img = new Image();
     img.onload = callback;
@@ -429,7 +988,25 @@ function openYouTube() {
     </div>
 
     <div id="app-334-inner" style="padding:20px; font-family:monospace;">
-        ここに 33-4 のコードを貼る
+        <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>フィルタリング解除サンプル</title>
+</head>
+<body>
+<input type="text" id="urlInput" placeholder="URLを入力">
+<button onclick="openWebsite()">ウェブサイトを開く</button>
+<iframe id="websiteFrame" width="100%" height="600"></iframe>
+
+<script>
+function openWebsite() {
+    var url = document.getElementById("urlInput").value;
+    document.getElementById("websiteFrame").src = url;
+}
+</script>
+</body>
+</html>
     </div>
 </div>
 
@@ -440,7 +1017,517 @@ function openYouTube() {
     </div>
 
     <div id="app-2048-inner" style="padding:20px; font-family:monospace;">
-        ここに 2048 のコードを貼る
+        
+<!-- 2048 の中身（省略せず既存のまま） -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>2048</title>
+<style>
+  body {
+    background: #faf8ef;
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 40px;
+  }
+
+  #score {
+    font-size: 28px;
+    margin-bottom: 20px;
+    font-weight: bold;
+  }
+
+  #autoBtn {
+    font-size: 20px;
+    padding: 8px 20px;
+    margin-bottom: 20px;
+  }
+
+  #board {
+    position: relative;
+    width: 365px;
+    height: 365px;
+    background: #bbada0;
+    border-radius: 10px;
+    box-sizing: border-box;
+  }
+
+  .cell {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background: #cdc1b4;
+    border-radius: 5px;
+  }
+
+  .tile {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border-radius: 5px;
+    font-size: 30px;
+    font-weight: bold;
+    color: #776e65;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: left 0.15s ease, top 0.15s ease;
+  }
+
+  .new { animation: pop 0.2s ease-out; }
+  .merge { animation: merge 0.2s ease-out; }
+
+  @keyframes pop {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes merge {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+</style>
+</head>
+<body>
+
+<div id="score">Score: 0</div>
+<button id="autoBtn">Auto: OFF</button>
+<div id="board"></div>
+
+<script>
+/* ============================
+   基本設定
+============================ */
+const size = 4;
+let board = [];
+let score = 0;
+let lastSpawn = null;
+
+const boardDiv = document.getElementById("board");
+const OFFSET = 7;
+
+const colors = {
+  2:"#eee4da",4:"#ede0c8",8:"#f2b179",16:"#f59563",
+  32:"#f67c5f",64:"#f65e3b",128:"#edcf72",256:"#edcc61",
+  512:"#edc850",1024:"#edc53f",2048:"#edc22e",
+  4096:"#3c3a32",8192:"#1f1d1a",
+  16384:"#000000",32768:"#4c0000",65536:"#2b0000"
+};
+
+/* ============================
+   Auto
+============================ */
+let auto = false;
+let autoTimer = null;
+
+document.getElementById("autoBtn").onclick = () => {
+  auto = !auto;
+  document.getElementById("autoBtn").textContent = auto ? "Auto: ON" : "Auto: OFF";
+  if (auto) startAuto();
+  else stopAuto();
+};
+
+function startAuto() {
+  if (autoTimer) return;
+  autoTimer = setInterval(() => {
+    const dir = getBestMove();
+    if (dir) move(dir);
+  }, 20);
+}
+
+function stopAuto() {
+  clearInterval(autoTimer);
+  autoTimer = null;
+}
+
+/* ============================
+   評価関数
+============================ */
+function evalEmptyTiles(bd) {
+  let c = 0;
+  for (let i = 0; i < size; i++)
+    for (let j = 0; j < size; j++)
+      if (bd[i][j] === 0) c++;
+  return c * 700;
+}
+
+function evalSmoothness(bd) {
+  let s = 0;
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      if (bd[i][j] === 0) continue;
+      const v = Math.log2(bd[i][j]);
+      if (j + 1 < size && bd[i][j+1] !== 0)
+        s -= Math.abs(v - Math.log2(bd[i][j+1]));
+      if (i + 1 < size && bd[i+1][j] !== 0)
+        s -= Math.abs(v - Math.log2(bd[i+1][j]));
+    }
+  }
+  return s * 50;
+}
+
+function evalMonotonicity(bd) {
+  let s = 0;
+  for (let i = 0; i < size; i++)
+    for (let j = 0; j < size - 1; j++)
+      s += bd[i][j] >= bd[i][j+1] ? 6 : -4;
+
+  for (let j = 0; j < size; j++)
+    for (let i = 0; i < size - 1; i++)
+      s += bd[i][j] >= bd[i+1][j] ? 6 : -4;
+
+  return s;
+}
+
+function maxTilePosition(bd) {
+  let max = 0, pos = {i:0,j:0};
+  for (let i=0;i<size;i++)
+    for (let j=0;j<size;j++)
+      if (bd[i][j] > max) { max = bd[i][j]; pos = {i,j}; }
+  return pos;
+}
+
+function evalMaxTilePosition(bd) {
+  const p = maxTilePosition(bd);
+  return (size - p.i + size - p.j) * 200;
+}
+
+function evaluateBoard(bd) {
+  return evalEmptyTiles(bd)
+       + evalSmoothness(bd)
+       + evalMonotonicity(bd)
+       + evalMaxTilePosition(bd);
+}
+
+/* ============================
+   4手先読み AI
+============================ */
+function getBestMove() {
+  const dirs = ["up", "left", "right", "down"];
+
+  let bestDir = null;
+  let bestScore = -Infinity;
+
+  for (const dir of dirs) {
+    const b1 = clone(board);
+    if (!simulateMove(b1, dir)) continue;
+
+    const spawn1 = getSpawnList(b1);
+
+    let total = 0, count = 0;
+
+    for (const s1 of spawn1) {
+      const b2 = clone(b1);
+      b2[s1.i][s1.j] = s1.v;
+
+      for (const dir2 of dirs) {
+        const b3 = clone(b2);
+        if (!simulateMove(b3, dir2)) continue;
+
+        const spawn2 = getSpawnList(b3);
+
+        for (const s2 of spawn2) {
+          const b4 = clone(b3);
+          b4[s2.i][s2.j] = s2.v;
+
+          for (const dir3 of dirs) {
+            const b5 = clone(b4);
+            if (!simulateMove(b5, dir3)) continue;
+
+            const spawn3 = getSpawnList(b5);
+
+            for (const s3 of spawn3) {
+              const b6 = clone(b5);
+              b6[s3.i][s3.j] = s3.v;
+
+              for (const dir4 of dirs) {
+                const b7 = clone(b6);
+                if (!simulateMove(b7, dir4)) continue;
+
+                total += evaluateBoard(b7);
+                count++;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (count === 0) continue;
+
+    const avg = total / count;
+    if (avg > bestScore) {
+      bestScore = avg;
+      bestDir = dir;
+    }
+  }
+
+  return bestDir;
+}
+
+function getSpawnList(bd) {
+  const empty = getEmpty(bd);
+  const list = [];
+
+  const cells = empty.length > 4 ? shuffle(empty).slice(0, 4) : empty;
+
+  for (const pos of cells) {
+    list.push({ i: pos.i, j: pos.j, v: 2 });
+    list.push({ i: pos.i, j: pos.j, v: 4 });
+  }
+  return list;
+}
+
+/* ============================
+   盤面処理
+============================ */
+function clone(bd) {
+  return bd.map(r => r.slice());
+}
+
+function getEmpty(bd) {
+  const a=[];
+  for (let i=0;i<size;i++)
+    for (let j=0;j<size;j++)
+      if (bd[i][j]===0) a.push({i,j});
+  return a;
+}
+
+function shuffle(a) {
+  return a.map(v=>({v,r:Math.random()}))
+          .sort((a,b)=>a.r-b.r)
+          .map(x=>x.v);
+}
+
+function simulateMove(bd, dir) {
+  let moved = false;
+
+  function slide(arr) {
+    arr = arr.filter(v => v !== 0);
+    for (let i = 0; i < arr.length - 1; i++) {
+      if (arr[i] === arr[i + 1]) {
+        arr[i] *= 2;
+        arr[i + 1] = 0;
+      }
+    }
+    arr = arr.filter(v => v !== 0);
+    while (arr.length < size) arr.push(0);
+    return arr;
+  }
+
+  if (dir === "left") {
+    for (let i = 0; i < size; i++) {
+      const newRow = slide(bd[i]);
+      if (newRow.toString() !== bd[i].toString()) moved = true;
+      bd[i] = newRow;
+    }
+  }
+
+  if (dir === "right") {
+    for (let i = 0; i < size; i++) {
+      let row = bd[i].slice().reverse();
+      row = slide(row);
+      row.reverse();
+      if (row.toString() !== bd[i].toString()) moved = true;
+      bd[i] = row;
+    }
+  }
+
+  if (dir === "up") {
+    for (let j = 0; j < size; j++) {
+      let col = [];
+      for (let i = 0; i < size; i++) col.push(bd[i][j]);
+      col = slide(col);
+      for (let i = 0; i < size; i++) {
+        if (bd[i][j] !== col[i]) moved = true;
+        bd[i][j] = col[i];
+      }
+    }
+  }
+
+  if (dir === "down") {
+    for (let j = 0; j < size; j++) {
+      let col = [];
+      for (let i = 0; i < size; i++) col.push(bd[i][j]);
+      col = col.reverse();
+      col = slide(col);
+      col.reverse();
+      for (let i = 0; i < size; i++) {
+        if (bd[i][j] !== col[i]) moved = true;
+        bd[i][j] = col[i];
+      }
+    }
+  }
+
+  return moved;
+}
+
+/* ============================
+   描画
+============================ */
+function drawGrid() {
+  boardDiv.innerHTML = "";
+  for (let i=0;i<size;i++)
+    for (let j=0;j<size;j++) {
+      const c = document.createElement("div");
+      c.className="cell";
+      c.style.left = j*90 + OFFSET + "px";
+      c.style.top  = i*90 + OFFSET + "px";
+      boardDiv.appendChild(c);
+    }
+}
+
+function render(anim=[]) {
+  document.querySelectorAll(".tile").forEach(t=>t.remove());
+  for (let i=0;i<size;i++)
+    for (let j=0;j<size;j++)
+      if (board[i][j]!==0) {
+        const t = document.createElement("div");
+        t.className="tile";
+        t.textContent = board[i][j];
+        t.style.background = colors[board[i][j]] || "#3c3a32";
+        t.style.left = j*90 + OFFSET + "px";
+        t.style.top  = i*90 + OFFSET + "px";
+
+        if (lastSpawn && lastSpawn.i===i && lastSpawn.j===j)
+          t.classList.add("new");
+
+        const a = anim.find(x=>x.i===i && x.j===j);
+        if (a) t.classList.add(a.type);
+
+        boardDiv.appendChild(t);
+      }
+  lastSpawn = null;
+}
+
+function updateScore() {
+  document.getElementById("score").textContent = "Score: " + score;
+}
+
+/* ============================
+   ゲーム処理
+============================ */
+function spawn() {
+  const empty = getEmpty(board);
+  if (empty.length===0) return;
+  const p = empty[Math.floor(Math.random()*empty.length)];
+  board[p.i][p.j] = Math.random()<0.3?4:2;
+  lastSpawn = p;
+}
+
+function move(dir) {
+  let moved = false;
+  let anim = [];
+  const before = board.map(r=>r.slice());
+
+  function slide(arr) {
+    arr = arr.filter(v=>v!==0);
+    for (let i=0;i<arr.length-1;i++)
+      if (arr[i]===arr[i+1]) { arr[i]*=2; score+=arr[i]; arr[i+1]=0; }
+    arr = arr.filter(v=>v!==0);
+    while (arr.length<size) arr.push(0);
+    return arr;
+  }
+
+  if (dir==="left") {
+    for (let i=0;i<size;i++) {
+      const n = slide(board[i]);
+      if (n.toString()!==board[i].toString()) moved=true;
+      board[i]=n;
+    }
+  }
+  if (dir==="right") {
+    for (let i=0;i<size;i++) {
+      let r = board[i].slice().reverse();
+      r = slide(r);
+      r.reverse();
+      if (r.toString()!==board[i].toString()) moved=true;
+      board[i]=r;
+    }
+  }
+  if (dir==="up") {
+    for (let j=0;j<size;j++) {
+      let c=[];
+      for (let i=0;i<size;i++) c.push(board[i][j]);
+      c = slide(c);
+      for (let i=0;i<size;i++) {
+        if (board[i][j]!==c[i]) moved=true;
+        board[i][j]=c[i];
+      }
+    }
+  }
+  if (dir==="down") {
+    for (let j=0;j<size;j++) {
+      let c=[];
+      for (let i=0;i<size;i++) c.push(board[i][j]);
+      c = c.reverse();
+      c = slide(c);
+      c.reverse();
+      for (let i=0;i<size;i++) {
+        if (board[i][j]!==c[i]) moved=true;
+        board[i][j]=c[i];
+      }
+    }
+  }
+
+  if (!moved) return;
+
+  updateScore();
+
+  for (let i=0;i<size;i++)
+    for (let j=0;j<size;j++)
+      if (board[i][j]!==0 && before[i][j]!==board[i][j])
+        anim.push({i,j,type:"merge"});
+
+  render(anim);
+
+  setTimeout(()=>{
+    spawn();
+    render([{...lastSpawn,type:"new"}]);
+    if (isGameOver()) alert("Game Over!");
+  },150);
+}
+
+function isGameOver() {
+  for (let i=0;i<size;i++)
+    for (let j=0;j<size;j++) {
+      if (board[i][j]===0) return false;
+      if (j<size-1 && board[i][j]===board[i][j+1]) return false;
+      if (i<size-1 && board[i][j]===board[i+1][j]) return false;
+    }
+  return true;
+}
+
+/* ============================
+   初期化
+============================ */
+function init() {
+  board = Array.from({length:size},()=>Array(size).fill(0));
+  score = 0;
+  updateScore();
+  drawGrid();
+  spawn();
+  spawn();
+  render();
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key==="ArrowLeft") move("left");
+  if (e.key==="ArrowRight") move("right");
+  if (e.key==="ArrowUp") move("up");
+  if (e.key==="ArrowDown") move("down");
+});
+
+init();
+</script>
+
+</body>
+</html>
     </div>
 </div>
 
@@ -449,7 +1536,12 @@ function openYouTube() {
         <div class="close-btn" onclick="closeApp('app-tver')"></div>
         <div class="app-title">TVer</div>
     </div>
-    <iframe src="https://tver.jp" style="width:100%; height:calc(100% - 40px); border:none;"></iframe>
+    <iframe id="tver-iframe"
+        src="https://tver.jp"
+        style="width:100%; height:calc(100% - 40px); border:none;"
+        allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+        allowfullscreen>
+    </iframe>
 </div>
 
 <!-- ========================= -->
@@ -467,6 +1559,7 @@ function openYouTube() {
             <div class="settings-item" onclick="openSettingsPage('ura')">裏モード</div>
             <div class="settings-item" onclick="openSettingsPage('system')">システム</div>
             <div class="settings-item" onclick="openSettingsPage('info')">情報</div>
+            <div class="settings-item" onclick="openSettingsPage('news')">news</div>
         </div>
 
         <div class="settings-content" id="settings-content">
@@ -474,6 +1567,7 @@ function openYouTube() {
         </div>
     </div>
 </div>
+
 <script>
 /* ============================
    時計（ロック画面）
@@ -527,22 +1621,60 @@ document.getElementById("lockscreen").addEventListener("click", () => {
 
 /* ============================
    アプリ開閉
+   closeApp はフルスクリーン解除を考慮する実装
 ============================ */
 function openApp(id) {
-    document.getElementById(id).style.display = "block";
-if (id === "youtube") {
-    window.open("https://newpro-3xg0.onrender.com/", "_blank");
-    return;
-}
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.display = "block";
+
+    // 例：youtube トリガは外部タブ（互換性保持）
+    if (id === "youtube") {
+        window.open("https://sitepro-d3up.onrender.com/", "_blank");
+        return;
+    }
+
+    // 天気詳細を開くときは最新データを反映（既に openWeatherDetail でやっている）
 }
 
-function closeApp(id) {
-    document.getElementById(id).style.display = "none";
+async function closeApp(id) {
+    const app = document.getElementById(id);
+    if (!app) return;
+
+    try {
+        // ドキュメントが全画面になっていて、開いている app がその全画面要素
+        const fs = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+        if (fs) {
+            // もし全画面要素が閉じる対象の内部にある、または対象自身であれば解除する
+            if (fs === app || app.contains(fs)) {
+                if (document.exitFullscreen) await document.exitFullscreen();
+                else if (document.webkitExitFullscreen) await document.webkitExitFullscreen();
+                else if (document.mozCancelFullScreen) await document.mozCancelFullScreen();
+                else if (document.msExitFullscreen) await document.msExitFullscreen();
+            }
+        }
+    } catch (e) {
+        console.warn("fullscreen exit failed", e);
+    } finally {
+        app.style.display = "none";
+    }
 }
 
 /* ============================
    設定アプリ：ページ切り替え
+   （既存コードをそのまま活かす）
 ============================ */
+
+    function changeNewsSource(source) {
+    localStorage.setItem("news-source", source);
+    loadNewsHeadline(); // 即時反映
+}
+
+function loadNewsSettings() {
+    const sel = localStorage.getItem("news-source") || "nhk";
+    const radio = document.querySelector(`input[name="news-src"][value="${sel}"]`);
+    if (radio) radio.checked = true;
+}
 function openSettingsPage(page) {
     const content = document.getElementById("settings-content");
 
@@ -656,8 +1788,27 @@ function openSettingsPage(page) {
     `;
     return;
 }
+    if (page === "news") {
+        content.innerHTML = `
+            <h2>ニュース設定</h2>
+            <label>
+                <input type="radio" name="news-src" value="nhk"
+                onchange="changeNewsSource('nhk')"> NHK
+            </label><br>
+
+            <label>
+                <input type="radio" name="news-src" value="yahoo"
+                onchange="changeNewsSource('yahoo')"> Yahooニュース
+            </label>
+        `;
+        loadNewsSettings();
+        return; // ← 必ず入れる
+    }
 }
 
+</script>
+
+<script>
     function checkUraPass() {
     const input = document.getElementById("ura-pass").value;
     const result = document.getElementById("ura-result");
@@ -672,6 +1823,7 @@ function openSettingsPage(page) {
         result.textContent = "パスコードが違います。";
     }
 }
+
     function openWakame() {
     window.open("https://wkt-hcic.onrender.com/", "_blank");
 }
@@ -686,11 +1838,12 @@ function openUtopia() {
     const dock = document.getElementById("dock");
     if (dock) dock.style.display = enabled ? "flex" : "none";
 }
+</script>
 
-
-
+<script>
 /* ============================
    壁紙設定（既定 + カスタム）
+   既存の実装を保つ。起動時の反映も維持。
 ============================ */
 function setWallpaper(target, name) {
 
@@ -731,9 +1884,7 @@ function setWallpaper(target, name) {
     highlightSelectedWallpapers();
 }
 
-/* ============================
-   選択中の壁紙に青枠をつける
-============================ */
+/* highlight / applySaved / custom loaders (既存コード) */
 function highlightSelectedWallpapers() {
     const lock = localStorage.getItem("wallpaper-lock");
     const home = localStorage.getItem("wallpaper-home");
@@ -764,9 +1915,6 @@ function highlightSelectedWallpapers() {
     }
 }
 
-/* ============================
-   起動時に保存済み壁紙を反映
-============================ */
 function applySavedWallpapers() {
     const lock = localStorage.getItem("wallpaper-lock");
     const home = localStorage.getItem("wallpaper-home");
@@ -803,18 +1951,8 @@ function applySavedWallpapers() {
             "url('https://divnil.com/wallpaper/ipad/img/app/c/r/crznzmd_30b46d7f08cf7d136441d6e467126325_raw.jpg')";
     }
 }
-function setClockFormat(type) {
-    localStorage.setItem("clock-format", type);
-    updateClock(); // 即時反映
-}
 
-function loadClockFormat() {
-    return localStorage.getItem("clock-format") || "24";
-}
-
-/* ============================
-   カスタム壁紙を追加（最大5枚）
-============================ */
+/* カスタム追加 */
 function addCustomWallpaper() {
     const input = document.getElementById("wallpaper-url-input");
     if (!input) return;
@@ -824,7 +1962,6 @@ function addCustomWallpaper() {
 
     let list = JSON.parse(localStorage.getItem("custom-wallpapers") || "[]");
 
-    // ★ 枚数制限を削除したので無制限に追加できる
     list.push(url);
 
     localStorage.setItem("custom-wallpapers", JSON.stringify(list));
@@ -833,9 +1970,6 @@ function addCustomWallpaper() {
     input.value = "";
 }
 
-/* ============================
-   カスタム壁紙一覧を読み込む
-============================ */
 function loadCustomWallpapers() {
     const grid = document.getElementById("custom-wallpaper-grid");
     if (!grid) return;
@@ -855,10 +1989,11 @@ function loadCustomWallpapers() {
     highlightSelectedWallpapers();
 }
 
-/* ============================
-   起動時に壁紙を反映
-============================ */
+/* 起動時に壁紙を反映 */
 window.addEventListener("load", applySavedWallpapers);
+</script>
+
+<script>
     function changeIconSize(size) {
     localStorage.setItem("icon-size", size);
     applyIconSize();
@@ -904,8 +2039,179 @@ function applyIconSize() {
 
 updateClock();
 setInterval(updateClock, 1000);
+    function getResetKey() {
+    const now = new Date();
+    const d = new Date(now);
 
+    if (d.getHours() < 6) {
+        d.setDate(d.getDate() - 1);
+    }
+
+    return d.getFullYear() + "-" +
+           (d.getMonth() + 1) + "-" +
+           d.getDate();
+}
+
+function incrementSecretCount() {
+
+    const key = getResetKey();
+    const saved = JSON.parse(localStorage.getItem("secretData")) || {};
+
+    if (saved.key !== key) {
+        saved.key = key;
+        saved.count = 0;
+    }
+
+    saved.count = (saved.count || 0) + 1;
+
+    localStorage.setItem("secretData", JSON.stringify(saved));
+}
+
+/* ランダム裏ホーム背景 */
+function setRandomSecretBackground() {
+    const images = [
+        "moon.png",
+        "https://as1.ftcdn.net/jpg/02/12/02/70/1000_F_212027023_opZTy3Yso4HUNzYVAW94c9bYwuUsptaT.jpg",
+        "moon1.png"
+    ];
+
+    const randomImage = images[Math.floor(Math.random() * images.length)];
+
+    const secret = document.getElementById("secret-homescreen");
+    if (secret) secret.style.backgroundImage = `url('${randomImage}')`;
+}
+
+/* 初回ロードで裏背景も設定 */
+window.addEventListener("load", () => {
+    const bar = document.getElementById("weather-bar");
+    if (bar) {
+        bar.innerHTML = "奈良 🌤 読み込み中... ｜ ニュース取得中...";
+    }
+});
+    async function openNewsInside(url){
+    // kumaOS の実装ではニュースウィンドウのIDは "app-news" なのでそれを開く
+    openApp("app-news");
+
+    const frame = document.getElementById("news-frame");
+    if(!frame){
+        console.error("news-frame が見つかりません");
+        return;
+    }
+
+    // NHK はそのまま iframe に入れる
+    if(url.includes("nhk.or.jp")){
+        frame.src = url;
+        return;
+    }
+
+    // Yahoo はプロキシ経由で読み込む
+    if(url.includes("yahoo.co.jp")){
+        await openYahooProxyInside(url);
+        return;
+    }
+
+    // それ以外は直接 iframe に入れる（CSPやX-Frame-Optionsで弾かれる場合あり）
+    frame.src = url;
+}
+/* Yahooプロキシ */
+async function openYahooProxyInside(url){
+    const frame = document.getElementById("news-frame");
+    if(!frame){
+        console.error("news-frame が見つかりません");
+        return;
+    }
+
+    const proxies = [
+        u => "https://corsproxy.io/?" + encodeURIComponent(u),
+        u => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u),
+        u => "https://thingproxy.freeboard.io/fetch/" + encodeURIComponent(u)
+    ];
+
+    for (const proxy of proxies) {
+        try {
+            const res = await fetch(proxy(url));
+            if (!res.ok) continue;
+
+            const html = await res.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, "text/html");
+
+            // サイト内リンクをクリックしたときに親ウィンドウの openNewsInside を呼ぶように書き換え
+            doc.querySelectorAll("a[href]").forEach(a => {
+                try {
+                    const href = new URL(a.getAttribute("href"), url).href;
+                    // シングルクォートで渡すので href 中の ' をエスケープ
+                    const safe = href.replace(/'/g, "\\'");
+                    a.setAttribute("onclick", `window.parent.openNewsInside('${safe}'); return false;`);
+                    a.setAttribute("href", "#");
+                    a.removeAttribute("target");
+                } catch (e) {
+                    // 無効な href の場合は無視
+                }
+            });
+
+            // 画像をプロキシ経由に置き換え（遅延読み込み等はお好みで）
+            doc.querySelectorAll("img[src]").forEach(img => {
+                try {
+                    const src = new URL(img.getAttribute("src"), url).href;
+                    img.src = proxy(src);
+                    img.loading = "lazy";
+                } catch (e){}
+            });
+
+            const blob = new Blob([doc.documentElement.outerHTML], { type: "text/html" });
+            frame.src = URL.createObjectURL(blob);
+            return;
+        } catch (e) {
+            console.warn("proxy failed for", proxy(url), e);
+            // 次のプロキシへ
+        }
+    }
+
+    // 全プロキシ失敗時
+    frame.srcdoc = `<h2>読み込みに失敗しました</h2><p>プロキシでの取得に失敗しました。</p>`;
+}
 </script>
+
+<!-- ===== 天気バー ===== -->
+<div id="weather-bar" onclick="openWeatherDetail()">
+    奈良の天気を取得中...
+</div>
+
+<!-- ===== 天気詳細ウィンドウ ===== -->
+<div id="weather-detail" class="app-window" style="display:none;">
+    <div class="app-titlebar">
+        <div class="close-btn" onclick="closeApp('weather-detail')"></div>
+        <div class="app-title">奈良の天気</div>
+    </div>
+
+    <div id="weather-detail-content" style="padding:20px; overflow:auto;">
+        読み込み中...
+    </div>
+</div>
+    <div id="app-news" class="app-window">
+
+    <div class="app-titlebar">
+        <div class="close-btn" onclick="closeApp('app-news')"></div>
+        <div class="app-title">ニュース</div>
+    </div>
+
+    <div style="padding:10px">
+
+        <button onclick="openNHK()">NHKニュース</button>
+        <button onclick="openYahoo()">Yahooニュース</button>
+
+        <input id="news-url" style="width:60%" placeholder="URL">
+        <button onclick="loadYahooProxy()">開く</button>
+
+    </div>
+
+    <iframe id="news-frame"
+        style="width:100%; height:calc(100% - 80px); border:none;">
+    </iframe>
+
+</div>
+
 
 </body>
 </html>
