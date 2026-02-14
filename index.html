@@ -654,7 +654,28 @@ function closeSettings() {
 </script>
 
 <script>
-/* ============================
+    function login(){
+
+    const username = document.getElementById("username-input").value.trim();
+    const password = document.getElementById("password-input").value;
+
+    if(!USERS[username]){
+        alert("ユーザーが存在しません");
+        return;
+    }
+
+    if(password === USERS[username]){
+
+        openApp("secret-app");
+
+    }else{
+
+        alert("パスワードが違います");
+
+    }
+}
+
+/* ============================\
    天気 + ニュース (奈良)
    - latestWeatherData
    - latestNewsData
