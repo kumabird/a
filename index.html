@@ -2240,6 +2240,18 @@ async function openYahooProxyInside(url){
 }
     window.addEventListener("load", loadUsers);
 
+    window.addEventListener("load", ()=>{
+
+    const saved = getCookie("wallpaper");
+
+    if(saved){
+        document.body.style.backgroundImage = `url('${saved}')`;
+        document.body.style.backgroundSize = "cover";
+        document.body.style.backgroundPosition = "center";
+    }
+
+});
+
 </script>
 
 <!-- ===== 天気バー ===== -->
